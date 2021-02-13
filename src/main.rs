@@ -65,16 +65,26 @@ fn ray_color(ray: &Ray, hittable: &dyn Hittable, bounces: i32) -> Vec3 {
 
     // tmin is 0.001 to prevent "shadow acne"
     if let Some(hit) = hittable.check_hit(&ray, 0.001, f64::MAX) {
-        // diffuse lighting:
-        // recursively determine color light ray approaching the hit location,
-        // using a random direction. We choose this direction by picking a point
-        // on the surface of the unit sphere tangent to the hit point, and
-        // finding the ray from the original reflection point to the randomly-
-        // chosen point.
-        let target = hit.pos + hit.normal + random_unit_sphere_offset().unit();
+        // This is the "easy/intuitive" diffuse method described in Shirley
+        // 8.25. We want to  recursively determine color light ray approaching
+        // the hit location, using a random direction. We choose this direction
+        // as follows:
+        //
+        // 1. Take a unit sphere at the point of reflection.
+        // 2. Divide the unit sphere into two hemispheres. The equatorial
+        //    plane's normal is the same as the normal at the reflection point,
+        //    so one hemisphere will be closer, and one hemisphere will be
+        //    farther.
+        // 3. Pick a random point in the farther hemisphere.
+        // 4. The next ray direction is the vector from the reflection point to
+        //    the randomly-chosen point.
+        let mut offset = random_unit_sphere_offset();
+        if Vec3::dot(offset, hit.normal) <= 0.0 {
+            offset = -offset;
+        }
         let next_ray = Ray {
             origin: hit.pos,
-            dir: target - hit.pos,
+            dir: offset,
         };
 
         // objects are considered 50% reflectors
@@ -95,12 +105,16 @@ fn write_color(color: Vec3) {
     )
 }
 
+fn lerp(min: f64, max: f64, t: f64) -> f64 {
+    (1.0 - t) * min + t * max
+}
+
 fn random_unit_sphere_offset() -> Vec3 {
     loop {
         let v = Vec3::new(
-            rand::random::<f64>(),
-            rand::random::<f64>(),
-            rand::random::<f64>(),
+            lerp(-1.0, 1.0, rand::random::<f64>()),
+            lerp(-1.0, 1.0, rand::random::<f64>()),
+            lerp(-1.0, 1.0, rand::random::<f64>()),
         );
         if v.length_squared() <= 1.0 {
             return v;
