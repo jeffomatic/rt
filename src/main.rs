@@ -1,5 +1,4 @@
 use core::f64;
-use rand::prelude::*;
 
 mod camera;
 mod hit;
