@@ -156,6 +156,11 @@ impl Vec3 {
         }
     }
 
+    pub fn near_zero(&self) -> bool {
+        let eps = 1e-8;
+        self.x.abs() < eps && self.y.abs() < eps && self.z.abs() < eps
+    }
+
     pub fn dot(a: Self, b: Self) -> f64 {
         a.x * b.x + a.y * b.y + a.z * b.z
     }
@@ -170,5 +175,9 @@ impl Vec3 {
 
     pub fn lerp(a: Self, b: Self, alpha: f64) -> Self {
         a * (1.0 - alpha) + b * alpha
+    }
+
+    pub fn reflect(v_in: Self, normal: Self) -> Self {
+        v_in - normal * 2.0 * Self::dot(v_in, normal)
     }
 }

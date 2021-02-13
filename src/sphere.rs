@@ -1,5 +1,6 @@
 use crate::{
     hit::{Hit, Hittable},
+    material::Material,
     ray::Ray,
     vec3::Vec3,
 };
@@ -8,6 +9,7 @@ use crate::{
 pub struct Sphere {
     pub pos: Vec3,
     pub r: f64,
+    pub material: Material,
 }
 
 impl Hittable for Sphere {
@@ -46,6 +48,7 @@ impl Hittable for Sphere {
             t: root,
             normal: normal_res.normal,
             front_face: normal_res.front_face,
+            material: self.material,
         })
     }
 }
