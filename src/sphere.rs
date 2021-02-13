@@ -38,10 +38,14 @@ impl Hittable for Sphere {
         }
 
         let hitpos = ray.at(root);
+        let out_normal = (hitpos - self.pos) / self.r;
+        let normal_res = Hit::get_normal(&ray, &out_normal);
+
         Some(Hit {
             pos: hitpos,
             t: root,
-            normal: (hitpos - self.pos) / self.r,
+            normal: normal_res.normal,
+            front_face: normal_res.front_face,
         })
     }
 }

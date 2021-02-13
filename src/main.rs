@@ -5,7 +5,7 @@ mod ray;
 mod sphere;
 mod vec3;
 
-use hit::Hittable;
+use hit::{Hittable, HittableList};
 use ray::Ray;
 use sphere::Sphere;
 use vec3::Vec3;
@@ -24,10 +24,15 @@ fn main() {
     let view_y = Vec3::new(0.0, view_height, 0.0);
     let view_origin = world_origin - view_x / 2.0 - view_y / 2.0 + Vec3::new(0.0, 0.0, -flength);
 
-    let sphere = Sphere {
+    let s1 = Sphere {
         pos: Vec3::new(0.0, 0.0, -1.0),
         r: 0.5,
     };
+    let s2 = Sphere {
+        pos: Vec3::new(0.0, -100.5, -1.0),
+        r: 100.0,
+    };
+    let world = HittableList::new(vec![&s1, &s2]);
 
     println!("P3");
     println!("{} {}", w, h);
@@ -43,7 +48,7 @@ fn main() {
                 dir: view_pos - world_origin,
             };
 
-            let color = if let Some(hit) = sphere.check_hit(&ray, 0.0, 100.0) {
+            let color = if let Some(hit) = world.check_hit(&ray, 0.0, f64::MAX) {
                 (hit.normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5 // project [-1, 1] into [0, 1]
             } else {
                 // background
