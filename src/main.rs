@@ -22,10 +22,15 @@ fn main() {
     let sampling_rate = 100;
     let max_bounces = 50;
 
-    let mat_ground = Material::Lambertian(Vec3::new(0.8, 0.8, 0.0));
-    let mat_center = Material::Lambertian(Vec3::new(0.7, 0.3, 0.3));
-    let mat_left = Material::Metal(Vec3::new(0.8, 0.8, 0.8), 0.3);
-    let mat_right = Material::Metal(Vec3::new(0.8, 0.6, 0.2), 1.0);
+    let mat_ground = Material::Lambertian {
+        albedo: Vec3::new(0.8, 0.8, 0.0),
+    };
+    let mat_center = Material::Dielectric { ir: 1.5 };
+    let mat_left = Material::Dielectric { ir: 1.5 };
+    let mat_right = Material::Metal {
+        albedo: Vec3::new(0.8, 0.6, 0.2),
+        fuzz: 1.0,
+    };
 
     let ground = Sphere {
         pos: Vec3::new(0.0, -100.5, -1.0),
@@ -70,9 +75,7 @@ fn main() {
             color /= sampling_rate as f64;
 
             // apply gamma correction
-            color.x = color.x.sqrt();
-            color.y = color.y.sqrt();
-            color.z = color.z.sqrt();
+            color = color.sqrt();
 
             write_color(color.clamp(0.0, 0.999));
         }

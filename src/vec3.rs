@@ -161,6 +161,14 @@ impl Vec3 {
         self.x.abs() < eps && self.y.abs() < eps && self.z.abs() < eps
     }
 
+    pub fn sqrt(self) -> Vec3 {
+        Self {
+            x: self.x.sqrt(),
+            y: self.y.sqrt(),
+            z: self.z.sqrt(),
+        }
+    }
+
     pub fn dot(a: Self, b: Self) -> f64 {
         a.x * b.x + a.y * b.y + a.z * b.z
     }
