@@ -1,3 +1,5 @@
+use rand::random;
+
 use crate::{
     hit::Hit,
     ray::Ray,
@@ -65,19 +67,40 @@ impl Material {
                 // and the only thing that currently generates hit normals is
                 // the sphere hittable, which returns unit vectors...
                 let cos_theta = f64::min(Vec3::dot(-in_dir, hit.normal), 1.0);
+                let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
-                // Calculate the refraction vector as the sum two vectors:
-                // - one vector orthogonal to the inverted surface normal
-                // - one vector parallel to the inverted surface normal
-                let refract_ortho = (in_dir + hit.normal * cos_theta) * refract_ratio;
-                let refract_parallel =
-                    hit.normal * -(1.0 as f64 - refract_ortho.length_squared()).abs().sqrt();
+                // We determine whether we refract or reflect based on whether
+                // there is a solution to Snell's Law. If there isn't, then we
+                // have to reflect.
+                let no_snell_solution = refract_ratio * sin_theta > 1.0;
+
+                // Some materials make it more likely to reflect at steep
+                // angles. We'll use Schlick's approximation to determine the
+                // probability, and randomly insert reflections.
+                let r0 = (1.0 - ir) / (1.0 + ir);
+                let r0_2 = r0 * r0;
+                let reflectance = r0_2 + (1.0 - r0_2) * (1.0 - cos_theta).powf(5.0);
+
+                let scatter_dir = if no_snell_solution || random::<f64>() < reflectance {
+                    // reflection
+                    Vec3::reflect(in_dir, hit.normal)
+                } else {
+                    // refraction
+                    // Calculate the refraction vector as the sum two vectors:
+                    // - one vector orthogonal to the inverted surface normal
+                    // - one vector parallel to the inverted surface normal
+                    let refract_ortho = (in_dir + hit.normal * cos_theta) * refract_ratio;
+                    let refract_parallel =
+                        hit.normal * -(1.0 as f64 - refract_ortho.length_squared()).abs().sqrt();
+
+                    refract_ortho + refract_parallel
+                };
 
                 Some(ScatterResult {
                     attenuation: Vec3::new(1.0, 1.0, 1.0),
                     ray: Ray {
                         origin: hit.pos,
-                        dir: refract_ortho + refract_parallel,
+                        dir: scatter_dir,
                     },
                 })
             }

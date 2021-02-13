@@ -25,7 +25,9 @@ fn main() {
     let mat_ground = Material::Lambertian {
         albedo: Vec3::new(0.8, 0.8, 0.0),
     };
-    let mat_center = Material::Dielectric { ir: 1.5 };
+    let mat_center = Material::Lambertian {
+        albedo: Vec3::new(0.1, 0.2, 0.5),
+    };
     let mat_left = Material::Dielectric { ir: 1.5 };
     let mat_right = Material::Metal {
         albedo: Vec3::new(0.8, 0.6, 0.2),
@@ -47,13 +49,18 @@ fn main() {
         r: 0.5,
         material: mat_left,
     };
+    let left_inner = Sphere {
+        pos: Vec3::new(-1.0, 0.0, -1.0),
+        r: -0.4,
+        material: mat_left,
+    };
     let right = Sphere {
         pos: Vec3::new(1.0, 0.0, -1.0),
         r: 0.5,
         material: mat_right,
     };
 
-    let world = HittableList::new(vec![&ground, &center, &left, &right]);
+    let world = HittableList::new(vec![&ground, &center, &left, &left_inner, &right]);
     let camera = Camera::new(aspect);
 
     println!("P3");
