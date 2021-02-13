@@ -22,46 +22,27 @@ fn main() {
     let sampling_rate = 100;
     let max_bounces = 50;
 
-    let mat_ground = Material::Lambertian {
-        albedo: Vec3::new(0.8, 0.8, 0.0),
+    let mat_left = Material::Lambertian {
+        albedo: Vec3::new(0.0, 0.0, 1.0),
     };
-    let mat_center = Material::Lambertian {
-        albedo: Vec3::new(0.1, 0.2, 0.5),
-    };
-    let mat_left = Material::Dielectric { ir: 1.5 };
-    let mat_right = Material::Metal {
-        albedo: Vec3::new(0.8, 0.6, 0.2),
-        fuzz: 1.0,
+    let mat_right = Material::Lambertian {
+        albedo: Vec3::new(1.0, 0.0, 0.0),
     };
 
-    let ground = Sphere {
-        pos: Vec3::new(0.0, -100.5, -1.0),
-        r: 100.0,
-        material: mat_ground,
-    };
-    let center = Sphere {
-        pos: Vec3::new(0.0, 0.0, -1.0),
-        r: 0.5,
-        material: mat_center,
-    };
-    let left = Sphere {
-        pos: Vec3::new(-1.0, 0.0, -1.0),
-        r: 0.5,
+    let radius = f64::consts::FRAC_PI_4.cos();
+    let sphere_left = Sphere {
+        pos: Vec3::new(-radius, 0.0, -1.0),
+        r: radius,
         material: mat_left,
     };
-    let left_inner = Sphere {
-        pos: Vec3::new(-1.0, 0.0, -1.0),
-        r: -0.4,
-        material: mat_left,
-    };
-    let right = Sphere {
-        pos: Vec3::new(1.0, 0.0, -1.0),
-        r: 0.5,
+    let sphere_right = Sphere {
+        pos: Vec3::new(radius, 0.0, -1.0),
+        r: radius,
         material: mat_right,
     };
 
-    let world = HittableList::new(vec![&ground, &center, &left, &left_inner, &right]);
-    let camera = Camera::new(aspect);
+    let world = HittableList::new(vec![&sphere_left, &sphere_right]);
+    let camera = Camera::new(f64::consts::FRAC_PI_2, aspect);
 
     println!("P3");
     println!("{} {}", w, h);

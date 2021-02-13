@@ -8,8 +8,8 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(aspect: f64) -> Camera {
-        let view_height = 2.0;
+    pub fn new(vfov: f64, aspect: f64) -> Camera {
+        let view_height = 2.0 * (vfov / 2.0).tan();
         let view_width = view_height * aspect;
         let flength = 1.0;
 
