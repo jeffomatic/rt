@@ -19,6 +19,14 @@ impl ops::Add<Vec3> for Vec3 {
     }
 }
 
+impl ops::AddAssign<Vec3> for Vec3 {
+    fn add_assign(&mut self, rhs: Vec3) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
+    }
+}
+
 impl ops::Sub<Vec3> for Vec3 {
     type Output = Vec3;
 
@@ -130,6 +138,14 @@ impl Vec3 {
 
     pub fn unit(self) -> Self {
         self / self.length()
+    }
+
+    pub fn clamp(self, min: f64, max: f64) -> Self {
+        Self {
+            x: self.x.clamp(min, max),
+            y: self.y.clamp(min, max),
+            z: self.z.clamp(min, max),
+        }
     }
 
     pub fn dot(a: Self, b: Self) -> f64 {

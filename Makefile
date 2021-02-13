@@ -3,7 +3,7 @@
 default: build img
 
 build:
-	cargo build
+	cargo build --release
 
 img:
-	./target/debug/rt > out.ppm
+	./target/release/rt > out.ppm
