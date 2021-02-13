@@ -1,9 +1,13 @@
 use core::f64;
 
+mod hit;
 mod ray;
+mod sphere;
 mod vec3;
 
+use hit::Hittable;
 use ray::Ray;
+use sphere::Sphere;
 use vec3::Vec3;
 
 fn main() {
@@ -20,8 +24,10 @@ fn main() {
     let view_y = Vec3::new(0.0, view_height, 0.0);
     let view_origin = world_origin - view_x / 2.0 - view_y / 2.0 + Vec3::new(0.0, 0.0, -flength);
 
-    let sphere_center = Vec3::new(0.0, 0.0, -1.0);
-    let sphere_radius = 0.5;
+    let sphere = Sphere {
+        pos: Vec3::new(0.0, 0.0, -1.0),
+        r: 0.5,
+    };
 
     println!("P3");
     println!("{} {}", w, h);
@@ -37,9 +43,8 @@ fn main() {
                 dir: view_pos - world_origin,
             };
 
-            let color = if let Some(t) = hit_sphere(sphere_center, sphere_radius, ray) {
-                let normal = (ray.at(t) - sphere_center).unit();
-                (normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5 // project [-1, 1] into [0, 1]
+            let color = if let Some(hit) = sphere.check_hit(&ray, 0.0, 100.0) {
+                (hit.normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5 // project [-1, 1] into [0, 1]
             } else {
                 // background
                 let t = 0.5 * ray.dir.unit().y + 0.5;
@@ -58,18 +63,4 @@ fn write_color(color: Vec3) {
         (255.0 * color.y).round() as i32,
         (255.0 * color.z).round() as i32
     )
-}
-
-fn hit_sphere(center: Vec3, radius: f64, ray: Ray) -> Option<f64> {
-    let center_to_origin = ray.origin - center;
-    let a = Vec3::dot(ray.dir, ray.dir);
-    let b = 2.0 * Vec3::dot(ray.dir, center_to_origin);
-    let c = Vec3::dot(center_to_origin, center_to_origin) - radius * radius;
-    let d = b * b - 4.0 * a * c;
-
-    if d < 0.0 {
-        return None;
-    }
-
-    Some((-b - d.sqrt()) / (2.0 * a))
 }
