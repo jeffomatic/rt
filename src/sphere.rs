@@ -38,7 +38,7 @@ impl Hittable for Sphere {
         }
 
         let hitpos = ray.at(root);
-        let out_normal = (hitpos - self.pos) / self.r;
+        let out_normal = (hitpos - self.pos) / self.r; // divide to get unit normal
         let normal_res = Hit::get_normal(&ray, &out_normal);
 
         Some(Hit {
