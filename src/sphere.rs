@@ -17,13 +17,14 @@ impl Hittable for Sphere {
     fn check_hit(&self, ray: &Ray, tmin: f32, tmax: f32) -> Option<Hit> {
         let center_to_origin = ray.origin - self.pos;
 
-        // construct components of quadratic formula
+        // Construct components of quadratic formula. This uses an algebraic
+        // simplification that uses half_b, which is equal to b / 2.
         let a = ray.dir.dot(ray.dir);
-        let b = 2.0 * Vec3A::dot(ray.dir, center_to_origin);
+        let half_b = Vec3A::dot(ray.dir, center_to_origin);
         let c = Vec3A::dot(center_to_origin, center_to_origin) - self.r * self.r;
 
         // d -> discriminant (portion within square root operator)
-        let d = b * b - 4.0 * a * c;
+        let d = half_b * half_b - a * c;
         if d < 0.0 {
             // no roots
             return None;
@@ -32,9 +33,9 @@ impl Hittable for Sphere {
         let dsqrt = d.sqrt();
 
         // Find the first root within the acceptable range
-        let mut root = (-b - dsqrt) / (2.0 * a);
+        let mut root = (-half_b - dsqrt) / a;
         if root < tmin || tmax < root {
-            root = (-b + dsqrt) / (2.0 * a);
+            root = (-half_b + dsqrt) / a;
             if root < tmin || tmax < root {
                 return None;
             }
