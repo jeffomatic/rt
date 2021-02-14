@@ -59,7 +59,7 @@ impl Material {
 
             Material::Dielectric { ir } => {
                 let refract_ratio = if hit.front_face { 1.0 / ir } else { *ir };
-                let in_dir = ray_in.dir.clone().normalize();
+                let in_dir = ray_in.dir.normalize();
 
                 // theta is the angle of _incidence_.
                 // TODO: is the min necessary here if both in_dir and hit.normal

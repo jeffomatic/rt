@@ -174,7 +174,7 @@ fn ray_color(ray: &Ray, world: &dyn Hittable, bounces: i32) -> Vec3A {
     }
 
     // background
-    let t = 0.5 * ray.dir.clone().normalize().y + 0.5;
+    let t = 0.5 * ray.dir.normalize().y + 0.5;
     Vec3A::lerp(Vec3A::one(), Vec3A::new(0.5, 0.7, 1.0), t)
 }
 

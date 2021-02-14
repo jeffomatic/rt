@@ -25,9 +25,9 @@ impl Hit {
         let front_face = Vec3A::dot(ray.dir, *out_normal) < 0.0;
         NormalInfo {
             normal: if front_face {
-                out_normal.clone()
+                *out_normal
             } else {
-                -out_normal.clone()
+                -*out_normal
             },
             front_face,
         }
