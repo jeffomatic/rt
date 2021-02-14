@@ -1,25 +1,26 @@
+use glam::Vec3A;
+
 use crate::{
     hit::{Hit, Hittable},
     material::Material,
     ray::Ray,
-    vec3::Vec3,
 };
 
 #[derive(Debug, Clone, Copy)]
 pub struct Sphere {
-    pub pos: Vec3,
-    pub r: f64,
+    pub pos: Vec3A,
+    pub r: f32,
     pub material: Material,
 }
 
 impl Hittable for Sphere {
-    fn check_hit(&self, ray: &Ray, tmin: f64, tmax: f64) -> Option<Hit> {
+    fn check_hit(&self, ray: &Ray, tmin: f32, tmax: f32) -> Option<Hit> {
         let center_to_origin = ray.origin - self.pos;
 
         // construct components of quadratic formula
-        let a = Vec3::dot(ray.dir, ray.dir);
-        let b = 2.0 * Vec3::dot(ray.dir, center_to_origin);
-        let c = Vec3::dot(center_to_origin, center_to_origin) - self.r * self.r;
+        let a = ray.dir.dot(ray.dir);
+        let b = 2.0 * Vec3A::dot(ray.dir, center_to_origin);
+        let c = Vec3A::dot(center_to_origin, center_to_origin) - self.r * self.r;
 
         // d -> discriminant (portion within square root operator)
         let d = b * b - 4.0 * a * c;

@@ -1,23 +1,25 @@
-use crate::{ray::Ray, util::random_within_unit_disk, vec3::Vec3};
+use glam::Vec3A;
+
+use crate::{ray::Ray, util::random_within_unit_disk};
 
 pub struct Camera {
-    pos: Vec3,
-    view_origin: Vec3,
-    view_up: Vec3,
-    view_right: Vec3,
-    view_x: Vec3, // view_right, scaled by focus distance and viewport width
-    view_y: Vec3, // view_up, scaled by focus distance and viewport height
-    lens_radius: f64,
+    pos: Vec3A,
+    view_origin: Vec3A,
+    view_up: Vec3A,
+    view_right: Vec3A,
+    view_x: Vec3A, // view_right, scaled by focus distance and viewport width
+    view_y: Vec3A, // view_up, scaled by focus distance and viewport height
+    lens_radius: f32,
 }
 
 pub struct Config {
-    pub pos: Vec3,
-    pub target: Vec3,
-    pub vup: Vec3,
-    pub vfov: f64,
-    pub aspect: f64,
-    pub lens_radius: f64, // half the aperture, which is a diameter
-    pub focus_distance: f64,
+    pub pos: Vec3A,
+    pub target: Vec3A,
+    pub vup: Vec3A,
+    pub vfov: f32,
+    pub aspect: f32,
+    pub lens_radius: f32, // half the aperture, which is a diameter
+    pub focus_distance: f32,
 }
 
 impl Camera {
@@ -25,9 +27,9 @@ impl Camera {
         let view_height = 2.0 * (config.vfov / 2.0).tan();
         let view_width = view_height * config.aspect;
 
-        let lookdir = (config.target - config.pos).unit();
-        let view_right = Vec3::cross(lookdir, config.vup).unit();
-        let view_up = Vec3::cross(view_right, lookdir);
+        let lookdir = (config.target - config.pos).normalize();
+        let view_right = lookdir.cross(config.vup).normalize();
+        let view_up = view_right.cross(lookdir);
 
         let pos = config.pos;
         let view_x = view_right * view_width * config.focus_distance;
@@ -45,7 +47,7 @@ impl Camera {
         }
     }
 
-    pub fn ray(&self, u: f64, v: f64) -> Ray {
+    pub fn ray(&self, u: f32, v: f32) -> Ray {
         // A random offset of the ray origin provides for defocus blurring.
         let offset_factor = random_within_unit_disk() * self.lens_radius;
         let offset = self.view_right * offset_factor.x + self.view_up * offset_factor.y;
