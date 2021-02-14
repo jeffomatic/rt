@@ -60,12 +60,16 @@ fn main() {
     let w = 400;
     let h = (w as f64 / aspect).round() as i32;
 
+    let pos = Vec3::new(3.0, 3.0, 2.0);
+    let target = Vec3::new(0.0, 0.0, -1.0);
     let camera = Camera::new(camera::Config {
-        pos: Vec3::new(-2.0, 2.0, 1.0),
-        target: Vec3::new(0.0, 0.0, -1.0),
+        pos,
+        target,
         vup: Vec3::new(0.0, 1.0, 0.0),
         vfov: 0.35,
         aspect,
+        lens_radius: 1.0,
+        focus_distance: (target - pos).length(),
     });
 
     println!("P3");
