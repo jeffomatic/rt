@@ -1,6 +1,6 @@
 use glam::Vec3A;
 
-use crate::{ray::Ray, util::random_within_unit_disk};
+use crate::{ray::Ray, util::random_within_unit_disc};
 
 pub struct Camera {
     pos: Vec3A,
@@ -49,7 +49,7 @@ impl Camera {
 
     pub fn ray(&self, u: f32, v: f32) -> Ray {
         // A random offset of the ray origin provides for defocus blurring.
-        let offset_factor = random_within_unit_disk() * self.lens_radius;
+        let offset_factor = random_within_unit_disc() * self.lens_radius;
         let offset = self.view_right * offset_factor.x + self.view_up * offset_factor.y;
 
         let view_origin = self.pos + offset;

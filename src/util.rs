@@ -22,7 +22,7 @@ pub fn random_unit_vector() -> Vec3A {
     random_unit_sphere_offset().normalize()
 }
 
-pub fn random_within_unit_disk() -> Vec3A {
+pub fn random_within_unit_disc() -> Vec3A {
     loop {
         let v = Vec3A::new(random_between(-1.0, 1.0), random_between(-1.0, 1.0), 0.0);
         if v.length_squared() < 1.0 {
