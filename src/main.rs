@@ -1,6 +1,3 @@
-use core::f32;
-use std::io::Write;
-
 mod camera;
 mod hit;
 mod material;
@@ -9,12 +6,14 @@ mod sphere;
 mod util;
 
 use camera::Camera;
+use core::f32;
 use glam::Vec3A;
 use hit::{Hittable, HittableList};
 use material::Material;
 use rand::random;
 use ray::Ray;
 use sphere::Sphere;
+use std::io::Write;
 use util::{random_between, vec3a_random};
 
 fn main() {
