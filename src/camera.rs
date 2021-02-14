@@ -7,16 +7,27 @@ pub struct Camera {
     view_y: Vec3,
 }
 
-impl Camera {
-    pub fn new(vfov: f64, aspect: f64) -> Camera {
-        let view_height = 2.0 * (vfov / 2.0).tan();
-        let view_width = view_height * aspect;
-        let flength = 1.0;
+pub struct Config {
+    pub pos: Vec3,
+    pub target: Vec3,
+    pub vup: Vec3,
+    pub vfov: f64,
+    pub aspect: f64,
+}
 
-        let pos = Vec3::new(0.0, 0.0, 0.0);
-        let view_x = Vec3::new(view_width as f64, 0.0, 0.0);
-        let view_y = Vec3::new(0.0, view_height, 0.0);
-        let view_origin = pos - view_x / 2.0 - view_y / 2.0 + Vec3::new(0.0, 0.0, -flength);
+impl Camera {
+    pub fn new(config: Config) -> Camera {
+        let view_height = 2.0 * (config.vfov / 2.0).tan();
+        let view_width = view_height * config.aspect;
+
+        let lookdir = (config.target - config.pos).unit();
+        let view_right = Vec3::cross(lookdir, config.vup).unit();
+        let view_up = Vec3::cross(view_right, lookdir);
+
+        let pos = config.pos;
+        let view_x = view_right * view_width;
+        let view_y = view_up * view_height;
+        let view_origin = pos - view_x / 2.0 - view_y / 2.0 + lookdir;
 
         Camera {
             pos,

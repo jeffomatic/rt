@@ -16,37 +16,64 @@ use sphere::Sphere;
 use vec3::Vec3;
 
 fn main() {
-    let aspect: f64 = 16.0 / 9.0;
-    let w = 400;
-    let h = (w as f64 / aspect).round() as i32;
-    let sampling_rate = 100;
-    let max_bounces = 50;
-
-    let mat_left = Material::Lambertian {
-        albedo: Vec3::new(0.0, 0.0, 1.0),
+    let mat_ground = Material::Lambertian {
+        albedo: Vec3::new(0.8, 0.8, 0.0),
     };
-    let mat_right = Material::Lambertian {
-        albedo: Vec3::new(1.0, 0.0, 0.0),
+    let mat_center = Material::Lambertian {
+        albedo: Vec3::new(0.1, 0.2, 0.5),
+    };
+    let mat_left = Material::Dielectric { ir: 1.5 };
+    let mat_right = Material::Metal {
+        albedo: Vec3::new(0.8, 0.6, 0.2),
+        fuzz: 0.0,
     };
 
-    let radius = f64::consts::FRAC_PI_4.cos();
-    let sphere_left = Sphere {
-        pos: Vec3::new(-radius, 0.0, -1.0),
-        r: radius,
+    let ground = Sphere {
+        pos: Vec3::new(0.0, -100.5, -1.0),
+        r: 100.0,
+        material: mat_ground,
+    };
+    let center = Sphere {
+        pos: Vec3::new(0.0, 0.0, -1.0),
+        r: 0.5,
+        material: mat_center,
+    };
+    let left = Sphere {
+        pos: Vec3::new(-1.0, 0.0, -1.0),
+        r: 0.5,
         material: mat_left,
     };
-    let sphere_right = Sphere {
-        pos: Vec3::new(radius, 0.0, -1.0),
-        r: radius,
+    let left_inner = Sphere {
+        pos: Vec3::new(-1.0, 0.0, -1.0),
+        r: -0.45,
+        material: mat_left,
+    };
+    let right = Sphere {
+        pos: Vec3::new(1.0, 0.0, -1.0),
+        r: 0.5,
         material: mat_right,
     };
 
-    let world = HittableList::new(vec![&sphere_left, &sphere_right]);
-    let camera = Camera::new(f64::consts::FRAC_PI_2, aspect);
+    let world = HittableList::new(vec![&ground, &center, &left, &left_inner, &right]);
+
+    let aspect: f64 = 16.0 / 9.0;
+    let w = 400;
+    let h = (w as f64 / aspect).round() as i32;
+
+    let camera = Camera::new(camera::Config {
+        pos: Vec3::new(-2.0, 2.0, 1.0),
+        target: Vec3::new(0.0, 0.0, -1.0),
+        vup: Vec3::new(0.0, 1.0, 0.0),
+        vfov: 0.35,
+        aspect,
+    });
 
     println!("P3");
     println!("{} {}", w, h);
     println!("255");
+
+    let sampling_rate = 100;
+    let max_bounces = 50;
 
     for i in 0..h {
         for j in 0..w {
