@@ -1,5 +1,7 @@
 use std::ops;
 
+use crate::util::random_between;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
     pub x: f64,
@@ -187,5 +189,13 @@ impl Vec3 {
 
     pub fn reflect(v_in: Self, normal: Self) -> Self {
         v_in - normal * 2.0 * Self::dot(v_in, normal)
+    }
+
+    pub fn random(min: f64, max: f64) -> Self {
+        Self {
+            x: random_between(min, max),
+            y: random_between(min, max),
+            z: random_between(min, max),
+        }
     }
 }

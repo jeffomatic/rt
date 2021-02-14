@@ -25,13 +25,13 @@ pub fn random_unit_vector() -> Vec3 {
 
 pub fn random_within_unit_disk() -> Vec3 {
     loop {
-        let v = Vec3::new(
-            random::<f64>() * 2.0 - 1.0,
-            random::<f64>() * 2.0 - 1.0,
-            0.0,
-        );
+        let v = Vec3::new(random_between(-1.0, 1.0), random_between(-1.0, 1.0), 0.0);
         if v.length_squared() < 1.0 {
             return v;
         }
     }
+}
+
+pub fn random_between(min: f64, max: f64) -> f64 {
+    min + (max - min) * random::<f64>()
 }

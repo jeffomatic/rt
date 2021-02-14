@@ -1,4 +1,5 @@
 use core::f64;
+use std::io::Write;
 
 mod camera;
 mod hit;
@@ -11,75 +12,131 @@ mod vec3;
 use camera::Camera;
 use hit::{Hittable, HittableList};
 use material::Material;
+use rand::random;
 use ray::Ray;
 use sphere::Sphere;
+use util::random_between;
 use vec3::Vec3;
 
 fn main() {
-    let mat_ground = Material::Lambertian {
-        albedo: Vec3::new(0.8, 0.8, 0.0),
-    };
-    let mat_center = Material::Lambertian {
-        albedo: Vec3::new(0.1, 0.2, 0.5),
-    };
-    let mat_left = Material::Dielectric { ir: 1.5 };
-    let mat_right = Material::Metal {
-        albedo: Vec3::new(0.8, 0.6, 0.2),
-        fuzz: 0.0,
-    };
+    let mut spheres: Vec<Sphere> = Vec::new();
 
-    let ground = Sphere {
-        pos: Vec3::new(0.0, -100.5, -1.0),
-        r: 100.0,
-        material: mat_ground,
-    };
-    let center = Sphere {
-        pos: Vec3::new(0.0, 0.0, -1.0),
-        r: 0.5,
-        material: mat_center,
-    };
-    let left = Sphere {
-        pos: Vec3::new(-1.0, 0.0, -1.0),
-        r: 0.5,
-        material: mat_left,
-    };
-    let left_inner = Sphere {
-        pos: Vec3::new(-1.0, 0.0, -1.0),
-        r: -0.45,
-        material: mat_left,
-    };
-    let right = Sphere {
-        pos: Vec3::new(1.0, 0.0, -1.0),
-        r: 0.5,
-        material: mat_right,
-    };
+    // Large planet/ground sphere
+    spheres.push(Sphere {
+        pos: Vec3::new(0.0, -1000.0, 0.0),
+        r: 1000.0,
+        material: Material::Lambertian {
+            albedo: Vec3::new(0.5, 0.5, 0.5),
+        },
+    });
 
-    let world = HittableList::new(vec![&ground, &center, &left, &left_inner, &right]);
+    // Random small spheres
+    let span = 11;
+    let center = Vec3::new(4.0, 0.2, 0.0);
 
-    let aspect: f64 = 16.0 / 9.0;
-    let w = 400;
+    for x in -span..span {
+        for z in -span..span {
+            let pos = Vec3::new(
+                x as f64 + 0.9 * random::<f64>(),
+                0.2,
+                z as f64 + 0.9 * random::<f64>(),
+            );
+
+            if (pos - center).length() <= 0.9 {
+                continue;
+            }
+
+            let choose_mat = random::<f64>();
+
+            if choose_mat < 0.8 {
+                // lambertian
+                spheres.push(Sphere {
+                    pos,
+                    r: 0.2,
+                    material: Material::Lambertian {
+                        albedo: Vec3::random(0.0, 1.0) * Vec3::random(0.0, 1.0),
+                    },
+                });
+            } else if choose_mat < 0.95 {
+                // metal
+                spheres.push(Sphere {
+                    pos,
+                    r: 0.2,
+                    material: Material::Metal {
+                        albedo: Vec3::random(0.5, 1.0),
+                        fuzz: random_between(0.0, 0.5),
+                    },
+                });
+            } else {
+                // dielectric
+                spheres.push(Sphere {
+                    pos,
+                    r: 0.2,
+                    material: Material::Dielectric { ir: 1.5 },
+                });
+            }
+        }
+    }
+
+    // Large spheres
+    spheres.push(Sphere {
+        pos: Vec3::new(0.0, 1.0, 0.0),
+        r: 1.0,
+        material: Material::Dielectric { ir: 1.5 },
+    });
+    spheres.push(Sphere {
+        pos: Vec3::new(-4.0, 1.0, 0.0),
+        r: 1.0,
+        material: Material::Lambertian {
+            albedo: Vec3::new(0.4, 0.2, 0.1),
+        },
+    });
+    spheres.push(Sphere {
+        pos: Vec3::new(4.0, 1.0, 0.0),
+        r: 1.0,
+        material: Material::Metal {
+            albedo: Vec3::new(0.7, 0.6, 0.5),
+            fuzz: 0.0,
+        },
+    });
+
+    let world = HittableList::new(
+        spheres
+            .iter()
+            .map(|sphere| sphere as &dyn Hittable)
+            .collect(),
+    );
+
+    let aspect: f64 = 3.0 / 2.0;
+    let w = 1200;
     let h = (w as f64 / aspect).round() as i32;
 
-    let pos = Vec3::new(3.0, 3.0, 2.0);
-    let target = Vec3::new(0.0, 0.0, -1.0);
+    let pos = Vec3::new(13.0, 2.0, 3.0);
+    let target = Vec3::new(0.0, 0.0, 0.0);
     let camera = Camera::new(camera::Config {
         pos,
         target,
         vup: Vec3::new(0.0, 1.0, 0.0),
         vfov: 0.35,
         aspect,
-        lens_radius: 1.0,
-        focus_distance: (target - pos).length(),
+        lens_radius: 0.05,
+        focus_distance: 10.0,
     });
 
     println!("P3");
     println!("{} {}", w, h);
     println!("255");
 
-    let sampling_rate = 100;
+    let sampling_rate = 500;
     let max_bounces = 50;
 
     for i in 0..h {
+        let stderr = std::io::stderr();
+        let mut handle = stderr.lock();
+        handle
+            .write_all(format!("\rscanlines remaining: {} ", h - i).as_bytes())
+            .unwrap();
+
         for j in 0..w {
             let mut color = Vec3::new(0.0, 0.0, 0.0);
 
