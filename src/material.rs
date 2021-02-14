@@ -97,7 +97,7 @@ impl Material {
                 };
 
                 Some(ScatterResult {
-                    attenuation: Vec3A::new(1.0, 1.0, 1.0),
+                    attenuation: Vec3A::one(),
                     ray: Ray {
                         origin: hit.pos,
                         dir: scatter_dir,

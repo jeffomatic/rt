@@ -111,11 +111,11 @@ fn main() {
     let h = (w as f32 / aspect).round() as i32;
 
     let pos = Vec3A::new(13.0, 2.0, 3.0);
-    let target = Vec3A::new(0.0, 0.0, 0.0);
+    let target = Vec3A::zero();
     let camera = Camera::new(camera::Config {
         pos,
         target,
-        vup: Vec3A::new(0.0, 1.0, 0.0),
+        vup: Vec3A::unit_y(),
         vfov: 0.35,
         aspect,
         lens_radius: 0.05,
@@ -137,7 +137,7 @@ fn main() {
             .unwrap();
 
         for j in 0..w {
-            let mut color = Vec3A::new(0.0, 0.0, 0.0);
+            let mut color = Vec3A::zero();
 
             // average out multiple samples for antialiasing
             for _ in 0..sampling_rate {
@@ -161,7 +161,7 @@ fn main() {
 
 fn ray_color(ray: &Ray, world: &dyn Hittable, bounces: i32) -> Vec3A {
     if bounces <= 0 {
-        return Vec3A::new(0.0, 0.0, 0.0);
+        return Vec3A::zero();
     }
 
     // tmin is 0.001 to prevent "shadow acne"
@@ -170,12 +170,12 @@ fn ray_color(ray: &Ray, world: &dyn Hittable, bounces: i32) -> Vec3A {
             return scatter.attenuation * ray_color(&scatter.ray, world, bounces - 1);
         }
 
-        return Vec3A::new(0.0, 0.0, 0.0);
+        return Vec3A::zero();
     }
 
     // background
     let t = 0.5 * ray.dir.clone().normalize().y + 0.5;
-    Vec3A::lerp(Vec3A::new(1.0, 1.0, 1.0), Vec3A::new(0.5, 0.7, 1.0), t)
+    Vec3A::lerp(Vec3A::one(), Vec3A::new(0.5, 0.7, 1.0), t)
 }
 
 fn write_color(color: Vec3A) {
